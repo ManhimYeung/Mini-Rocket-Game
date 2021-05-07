@@ -13,24 +13,39 @@ public class CollisionHandler : MonoBehaviour
     float delayTimer = 1f;
 
     bool isTransitioning = false;
+    bool collisionDisable = false;
 
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
     }
+    void Update()
+    {
+        RespondDebugKeys();
+    }
+    void RespondDebugKeys()
+    {
+        if (Input.GetKeyDown(KeyCode.C))
+            collisionDisable = !collisionDisable;
+
+        else if (Input.GetKeyDown(KeyCode.LeftArrow))
+            LoadPreviousLevel();
+
+        else if (Input.GetKeyDown(KeyCode.RightArrow))
+            LoadNextLevel();
+        
+    }
     void OnCollisionEnter(Collision collision)
     {
-        if (isTransitioning) return;
+        if (isTransitioning || collisionDisable) 
+            return;
         switch (collision.gameObject.tag)
         {
             case "Friendly":
-                //Debug.Log("This thing is friendly. ");
+                //Launching pad, will implement new features soon.
                 break;
             case "Finish":
                 StartSuccessSequence();
-                break;
-            case "Fuel":
-                //Debug.Log("You picked up some fuel. ");
                 break;
             default:
                 StartCrashSequence();
@@ -66,12 +81,18 @@ public class CollisionHandler : MonoBehaviour
     {
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
         int nextSceneIndex = currentSceneIndex + 1;
-
         // Load level 1 if last scene is finished.
         if (nextSceneIndex == SceneManager.sceneCountInBuildSettings)
             nextSceneIndex = 0;
 
         SceneManager.LoadScene(nextSceneIndex);
     }
+    void LoadPreviousLevel()
+    {
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+        int previousSceneIndex = currentSceneIndex - 1;
 
+        if (currentSceneIndex != 0)
+            SceneManager.LoadScene(previousSceneIndex);
+    }
 }

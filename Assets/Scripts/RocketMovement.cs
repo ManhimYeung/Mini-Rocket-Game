@@ -22,7 +22,6 @@ public class RocketMovement : MonoBehaviour
     {
         rb = gameObject.GetComponent<Rigidbody>();
         audioSource = gameObject.GetComponent<AudioSource>();
-        Debug.Log(mainEngineParticles.isPlaying);
     }
 
     // Update is called once per frame
@@ -31,47 +30,57 @@ public class RocketMovement : MonoBehaviour
         ProcessThrust();
         ProcessRotation();
     }
-
     void ProcessThrust()
     {
         if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W))
-        {
-            rb.AddRelativeForce(Vector3.up * mainThrust * Time.deltaTime);
-            if (!audioSource.isPlaying)
-                audioSource.PlayOneShot(mainEngine);
-
-            if (!mainEngineParticles.isPlaying) { }
-                mainEngineParticles.Play();
-        }
+            StartThrusting();
         else
-        {
-            audioSource.Stop();
-            mainEngineParticles.Stop();
-        }
-
+            StopThrusting();
     }
     void ProcessRotation()
     {
         // Making sure the rocket is not able to rotate before leaving the launching pad.
-        if (!isFlying) return;
+        if (!isFlying)
+            return;
 
         if (Input.GetKey(KeyCode.A))
-        {
-            ApplyRotation(rotationThrust);
-            if (!rightThrusterParticles.isPlaying)
-                rightThrusterParticles.Play();
-        }
+            RotateLeft();
         else if (Input.GetKey(KeyCode.D))
-        {
-            ApplyRotation(-rotationThrust);
-            if (!leftThrusterParticles.isPlaying)
-            leftThrusterParticles.Play();
-        }
+            RotateRight();
         else
-        {
-            leftThrusterParticles.Stop();
-            rightThrusterParticles.Stop();
-        }
+            StopRotating();
+    }
+    void StartThrusting()
+    {
+        rb.AddRelativeForce(Vector3.up * mainThrust * Time.deltaTime);
+
+        if (!audioSource.isPlaying)
+            audioSource.PlayOneShot(mainEngine);
+
+        if (!mainEngineParticles.isPlaying)
+            mainEngineParticles.Play();
+    }
+    void StopThrusting()
+    {
+        audioSource.Stop();
+        mainEngineParticles.Stop();
+    }
+    void RotateLeft()
+    {
+        ApplyRotation(rotationThrust);
+        if (!rightThrusterParticles.isPlaying)
+            rightThrusterParticles.Play();
+    }
+    void RotateRight()
+    {
+        ApplyRotation(-rotationThrust);
+        if (!leftThrusterParticles.isPlaying)
+            leftThrusterParticles.Play();
+    }
+    void StopRotating()
+    {
+        leftThrusterParticles.Stop();
+        rightThrusterParticles.Stop();
     }
     void ApplyRotation(float rotationThisFrame)
     {
@@ -82,7 +91,9 @@ public class RocketMovement : MonoBehaviour
 
     void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject.tag == "Friendly")
+        if (collision.gameObject.CompareTag("Friendly"))
             isFlying = true;
     }
+
+
 }
